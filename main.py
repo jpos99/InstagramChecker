@@ -24,30 +24,34 @@ def find_posts(driver1):
     lista_nomes_perfis = prepara_lista_perfis(lista_perfis)
 
     for perfil in lista_nomes_perfis:
-        print(perfil)
-        print(type(perfil))
+
+        #print(type(perfil))
 
         try:
-            postagen = driver1.find_element_by_partial_link_text(perfil)
-            print(postagen)
+            post = driver1.find_element_by_partial_link_text(perfil)
 
         except:
+            print(perfil)
             relatorio.write(perfil + '\n')
         #sleep(intervalo)
     lista_posts = driver1.find_elements_by_xpath('// div[ @ class = "C4VMK"]')
     for post in lista_posts:
-
+        print(post.text)
         post = post.text.split('\n')
         nome_perfil = post[0]
-        print(nome_perfil)
-        size_text_post = len(post[1].split(' '))
-        print(post[1])
-        print(size_text_post)
-        print('\n')
-        if size_text_post < 4:
-            relatorio.write(nome_perfil + 'post pequeno\n')
 
-    #sleep(intervalo)
+        text_of_post = post[1].split(' ')
+
+        for word in post[1:len(post)-2]:
+            word = word.split(' ')
+            for w in word:
+                text_of_post.append(w)
+
+        size_text_post = len(text_of_post)
+
+        if size_text_post < 4 and nome_perfil in lista_nomes_perfis:
+            relatorio.write(nome_perfil + ';post pequeno\n')
+
 
 
 
@@ -57,7 +61,16 @@ def open_page(url_list):
     for url in url_list:
         url = url.replace('\n', '')
         driver1.get(url)
-        sleep(2)
+        there_are_btn_plus = True
+        while there_are_btn_plus:
+            try:
+                btn_more_posts = driver1.find_element_by_xpath(
+                    '// span[@class = "glyphsSpriteCircle_add__outline__24__grey_9 u-__7"] ')
+
+                btn_more_posts.click()
+                sleep(5)
+            except:
+                there_are_btn_plus = False
         relatorio.write(url)
         find_posts(driver1)
         relatorio.write('\n\n')
